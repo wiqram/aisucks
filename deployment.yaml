@@ -1,0 +1,105 @@
+# Web-only runtime manifest for the aisucks scaffold.
+#   Deployment (Next.js standalone) + NodePort Service.
+# No Postgres / migrate Job / Vault injector yet — this page has no data or secrets.
+# When the business idea needs a database or secrets, add (see
+# base-architecture-scaffold.md §3.4/§3.5):
+#   - a Postgres Deployment + ClusterIP Service (NEVER NodePort) + hostPath PV
+#   - a migrate Job
+#   - serviceAccountName: vault-secrets + Vault agent-inject annotations on this pod
+#   - the vault/ SOPS secrets + a `Refresh Vault secrets` stage in the Jenkinsfile
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: aisucks-web
+  namespace: aisucks
+  labels:
+    app: aisucks-web
+    app.kubernetes.io/part-of: aisucks
+spec:
+  replicas: 2
+  revisionHistoryLimit: 5
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  selector:
+    matchLabels:
+      app: aisucks-web
+  template:
+    metadata:
+      labels:
+        app: aisucks-web
+    spec:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1001
+        fsGroup: 1001
+      containers:
+        - name: aisucks-web
+          image: container-registry.traderyolo.com/aisucks-web:latest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 3000
+          env:
+            - name: NODE_ENV
+              value: "production"
+            - name: PORT
+              value: "3000"
+            - name: HOSTNAME
+              value: "0.0.0.0"
+            # Public, non-secret. Runtime (not build-inlined) so it can change without a rebuild.
+            - name: NEXT_PUBLIC_SITE_URL
+              value: "https://aisucks.predictonomy.com"
+          resources:
+            requests:
+              cpu: "50m"
+              memory: "128Mi"
+            limits:
+              cpu: "500m"
+              memory: "384Mi"
+          readinessProbe:
+            httpGet:
+              path: /api/health
+              port: 3000
+            initialDelaySeconds: 8
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 6
+          livenessProbe:
+            httpGet:
+              path: /api/health
+              port: 3000
+            initialDelaySeconds: 25
+            periodSeconds: 20
+            timeoutSeconds: 5
+            failureThreshold: 3
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: false
+            capabilities:
+              drop: ["ALL"]
+          # uid 1001 cannot mkdir the baked-in /app/.next/cache — give it a writable scratch dir.
+          volumeMounts:
+            - name: next-cache
+              mountPath: /app/.next/cache
+      volumes:
+        - name: next-cache
+          emptyDir: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: aisucks-web
+  namespace: aisucks
+  labels:
+    app: aisucks-web
+spec:
+  type: NodePort
+  selector:
+    app: aisucks-web
+  ports:
+    - name: http
+      nodePort: 30100
+      port: 3000
+      targetPort: 3000

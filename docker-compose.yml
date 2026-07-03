@@ -1,0 +1,13 @@
+# Local dev: just the web app in dev mode on port 3013 (no database yet).
+services:
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      NODE_ENV: development
+      PORT: "3013"
+      HOSTNAME: 0.0.0.0
+      NEXT_PUBLIC_SITE_URL: http://localhost:3013
+    ports:
+      - "3013:3013"

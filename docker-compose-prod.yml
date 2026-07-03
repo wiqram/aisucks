@@ -1,0 +1,9 @@
+# Production image build/push manifest (consumed by the Jenkinsfile with
+# --env-file .env.production). Web-only: builds the standalone Next.js image.
+services:
+  aisucks-web:
+    image: container-registry.traderyolo.com/aisucks-web:latest
+    build:
+      context: .
+      dockerfile: Dockerfile.production
+      target: runner
