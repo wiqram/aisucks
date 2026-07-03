@@ -39,6 +39,11 @@ git add -A && git commit -m "..." && git push
 jenkins-deploy aisucks          # from ~/bin (once the Jenkins job exists — see below)
 ```
 
+**Push-to-`main` auto-deploys.** A GitHub webhook (`repos/wiqram/aisucks/hooks` →
+`https://jenkins.traderyolo.com/github-webhook/`, push events) fires the Jenkins job
+`aisucks` on every push to `main` (the job has the *GitHub hook trigger for GITScm
+polling* enabled). No manual trigger needed.
+
 The `Jenkinsfile` runs two stages on the `kubernetes` cloud agent:
 1. **Build & push** — `docker compose -f docker-compose-prod.yml build/push aisucks-web`
 2. **Deploy** — `kubectl apply` namespace + deployment, then `rollout restart`/`status`
