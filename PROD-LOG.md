@@ -9,6 +9,16 @@ and *how it was verified* (kubectl status, curl of NodePort `172.16.238.2:30100`
 
 ---
 
+## 2026-07-12 — Namespace torn down (aisucks taken offline)
+
+- **Action:** `kubectl --context prod-minikube delete namespace aisucks` (operator request).
+- **Removed:** `aisucks-web` deployment (2 running pods), all ReplicaSets, and the
+  NodePort `aisucks-web` service (3000:30100). Namespace was `Active` for 8d prior.
+- **Verified down:** `kubectl --context prod-minikube get ns aisucks` → `NotFound`.
+  Site on NodePort `30100` is offline.
+- **Note:** push-to-main GitHub webhook → Jenkins auto-deploy is STILL enabled; a push
+  to `main` will rebuild and recreate the namespace. Not disabled per this request.
+
 ## 2026-07-03 — Push-to-main auto-deploy wired (GitHub webhook)
 
 - **Shipped:** GitHub push webhook on `wiqram/aisucks` → `https://jenkins.traderyolo.com/github-webhook/`
