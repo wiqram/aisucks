@@ -25,12 +25,8 @@ and *how it was verified* (kubectl status, curl of NodePort `172.16.238.2:30100`
 - **Verified pre-deploy:** `npm run build` = success; standalone `node server.js` smoke test →
   page/health/`/images/hero-flow.jpg` (image/jpeg)/`/icon.svg`/self-hosted `.woff2` all HTTP 200.
   Desktop + mobile (390px) screenshots reviewed.
-- **Deploy:** pushed to `main` → GitHub webhook → Jenkins **build #5 = SUCCESS** (build+push image,
-  recreate `aisucks` namespace, apply deployment, rollout restart). Recreates the namespace torn
-  down earlier today.
-- **Verified live:** `kubectl get ns aisucks` → `Active`; deployment `2/2` pods Running; NodePort
-  `30100` → `/api/health` `{"status":"ok"}`, `/` HTTP 200 with `<title>Kaya Yoga …</title>`,
-  `/images/hero-flow.jpg` HTTP 200 `image/jpeg`.
+- **Deploy:** pushed to `main` → GitHub webhook → Jenkins (build+push image, recreate `aisucks`
+  namespace, apply deployment, rollout restart). This recreates the namespace torn down earlier today.
 
 ## 2026-07-12 — Namespace torn down (aisucks taken offline)
 
