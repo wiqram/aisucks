@@ -1,13 +1,9 @@
 # aisucks
 
-Next.js app deployed on the private Minikube cloud. It now serves **Kaya Yoga** — a
-yoga marketing site for instructor **Kehmo Nagdev** (benefits of yoga, where it helps
-day-to-day, practice styles, teacher bio, booking CTA). The business idea was built on
-top of `app/page.tsx`; the deploy architecture (Docker → `container-registry.traderyolo.com`
-→ Jenkins → Minikube NodePort) is unchanged from the original scaffold.
-
-Images are localized in `public/images/` and fonts (Fraunces + Nunito Sans) are
-self-hosted in `app/fonts/` so the production image builds with no build-time network.
+Bare-bones Next.js app deployed on the private Minikube cloud. Right now it just
+renders **"AI Sucks!"** in large font — the entire deploy architecture (Docker →
+`container-registry.traderyolo.com` → Jenkins → Minikube NodePort) is wired around
+it. When the business idea is decided, it gets built on top of `app/page.tsx`.
 
 Scaffolded from `~/IdeaProjects/step0/base-architecture-scaffold.md`, **web-only
 variant** (no Postgres / Vault / migrate yet — added when the idea needs data).
