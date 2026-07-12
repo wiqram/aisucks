@@ -9,6 +9,25 @@ and *how it was verified* (kubectl status, curl of NodePort `172.16.238.2:30100`
 
 ---
 
+## 2026-07-12 — Business idea shipped: "Kaya Yoga" site (Kehmo Nagdev)
+
+- **Shipped:** the real business idea, built on top of the scaffold — **Kaya Yoga**, a
+  yoga marketing site guided by instructor **Kehmo Nagdev**. Single Next.js page with
+  sections: hero, ethos, **benefits of yoga** (6 cards), **where yoga helps hour-by-hour**
+  in daily life (timeline), practice styles, Meet Kehmo Nagdev, testimonials, and a
+  "first class free" CTA. "Warm dawn / organic editorial" design — Fraunces + Nunito Sans
+  (self-hosted woff2, latin), earth palette, grain + organic blob graphics, CSS scroll reveals.
+- **Assets:** 8 curated yoga photos localized into `public/images/` (no runtime external
+  dep); self-hosted fonts in `app/fonts/` so the image builds with **no build-time network**.
+- **Infra unchanged:** same namespace `aisucks`, image `aisucks-web:latest`, NodePort `30100`,
+  Docker→registry→Jenkins pipeline. `Dockerfile.production` already copies `public/` +
+  `.next/static`, so images + fonts ship in the standalone image.
+- **Verified pre-deploy:** `npm run build` = success; standalone `node server.js` smoke test →
+  page/health/`/images/hero-flow.jpg` (image/jpeg)/`/icon.svg`/self-hosted `.woff2` all HTTP 200.
+  Desktop + mobile (390px) screenshots reviewed.
+- **Deploy:** pushed to `main` → GitHub webhook → Jenkins (build+push image, recreate `aisucks`
+  namespace, apply deployment, rollout restart). This recreates the namespace torn down earlier today.
+
 ## 2026-07-12 — Namespace torn down (aisucks taken offline)
 
 - **Action:** `kubectl --context prod-minikube delete namespace aisucks` (operator request).
