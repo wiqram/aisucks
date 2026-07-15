@@ -9,30 +9,6 @@ and *how it was verified* (kubectl status, curl of NodePort `172.16.238.2:30100`
 
 ---
 
-## 2026-07-15 — Silver & Signal photography studio site live
-
-- **Shipped:** the first business idea on the scaffold — **Silver & Signal**, a
-  photography studio landing page with **two offerings**:
-  - **Silver** — genuine/traditional photography (film + portraiture), premium
-    line, `from £950`.
-  - **Signal** — cheaper AI-assisted editing + drone/aerial imaging, fast line,
-    `from £240`.
-  Full editorial-luxury darkroom design (Fraunces/Instrument Sans/IBM Plex Mono
-  via `next/font` — no new npm deps, lockfile untouched): hero, collections
-  split, contact-sheet portfolio, process, plain pricing, testimonials, and a
-  client-side `mailto` booking form. Added aperture favicon (`app/icon.svg`);
-  bumped `/api/health` to `1.0.0`.
-- **Deploy:** commit `53ab8ae` pushed to `main` → GitHub webhook auto-fired
-  Jenkins `aisucks` build **#10** = SUCCESS (build → push `:latest` → kubectl
-  apply → rollout restart, ~59s).
-- **Verified live:** `kubectl -n aisucks get po` → 2× `aisucks-web` pods
-  `Running 1/1` (freshly rolled). `curl http://172.16.238.2:30100/api/health`
-  → `{"status":"ok",...,"version":"1.0.0"}`; `curl http://172.16.238.2:30100/`
-  (HTTP 200) contains both collections, both price points, drone packages, and
-  studio contact. `/icon.svg` → 200.
-- **Not changed:** the designated default-state checkpoint (`f693e9e`, the bare
-  scaffold) still stands for reset-on-request.
-
 ## 2026-07-12 — Namespace torn down (aisucks taken offline)
 
 - **Action:** `kubectl --context prod-minikube delete namespace aisucks` (operator request).
