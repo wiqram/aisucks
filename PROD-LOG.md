@@ -9,6 +9,19 @@ and *how it was verified* (kubectl status, curl of NodePort `172.16.238.2:30100`
 
 ---
 
+## 2026-07-15 — Reset to default state (Silver & Signal reverted)
+
+- **Action:** operator asked to return the project to its designated default-state
+  checkpoint `f693e9e` (the bare "AI Sucks!" scaffold). Reverted the two
+  Silver & Signal commits with forward reverts (`ae6ee2c`, `4ed1be6`) rather than
+  a force-push — resulting tree is byte-identical to `f693e9e`.
+- **Deploy:** push to `main` → GitHub webhook auto-fired Jenkins `aisucks` build
+  **#12** = SUCCESS (~53s).
+- **Verified live:** 2× `aisucks-web` pods `Running 1/1` (freshly rolled);
+  `curl http://172.16.238.2:30100/` (HTTP 200) renders **"AI Sucks!"** with no
+  Silver/Signal content; `/api/health` → `version 0.1.0`; `/icon.svg` → 404.
+  Project is back to the scaffold.
+
 ## 2026-07-12 — Namespace torn down (aisucks taken offline)
 
 - **Action:** `kubectl --context prod-minikube delete namespace aisucks` (operator request).
