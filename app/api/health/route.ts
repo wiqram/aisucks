@@ -8,7 +8,7 @@ export async function GET() {
   return NextResponse.json({
     status: 'ok',
     service: 'aisucks-web',
-    version: process.env.APP_VERSION ?? '0.1.0',
+    version: process.env.APP_VERSION ?? '2.0.0',
     timestamp: new Date().toISOString()
   });
 }
