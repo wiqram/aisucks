@@ -9,6 +9,17 @@ and *how it was verified* (kubectl status, curl of NodePort `172.16.238.2:30100`
 
 ---
 
+## 2026-07-20 — Reset to default state (Control Tower reverted)
+
+- **Action:** operator asked to return the project to its designated default-state
+  checkpoint `f693e9e` (the bare "AI Sucks!" scaffold). Reverted the two Entity Data
+  Control Tower commits with forward reverts (`5c4caaf`, `e6e8e30`) rather than a
+  force-push — resulting tree is byte-identical to `f693e9e` (Transit/Prism, Chrome,
+  and all `app/lib/*` removed).
+- **Deploy:** push to `main` → GitHub webhook auto-fired Jenkins `aisucks` build
+  **#__** = pending.
+- **Verified live:** _pending._
+
 ## 2026-07-15 — Reset to default state (Silver & Signal reverted)
 
 - **Action:** operator asked to return the project to its designated default-state
