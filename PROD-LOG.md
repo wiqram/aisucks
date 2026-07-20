@@ -9,29 +9,6 @@ and *how it was verified* (kubectl status, curl of NodePort `172.16.238.2:30100`
 
 ---
 
-## 2026-07-16 — Entity Data Control Tower live (Transit + Prism)
-
-- **Shipped:** two business ideas as one internal console (portal hub at `/`):
-  - **Transit** (`/track`) — global hardware-ETA tracker. Demo login for regional
-    logistics colleagues (EMEA/AMER/APAC/LATAM + global admin, password
-    `controltower`); contributors log shipments (routers/switches/firewalls/
-    SD-WAN/servers…) with ETAs & destinations; consolidated dashboard (KPIs +
-    status/region/type charts + filterable table) and a shareable customer-facing
-    ETA view. Added entries + status changes persist in `localStorage`.
-  - **Prism** (`/reports`) — Salesforce/ERP reporting workbench. Slice/dice
-    pipeline: measure (amount/count/avg/weighted) × group-by × pivot across 7
-    dimensions, filters, KPIs, bar chart, pivot table, CSV export.
-  - Seeded test data: 24 shipments, 96 opportunities. Enterprise light theme
-    (Hanken Grotesk / Instrument Serif / JetBrains Mono via `next/font` — no new
-    npm deps, lockfile untouched). `/api/health` → `2.0.0`; new favicon.
-- **Deploy:** commit `41d1bc8` pushed to `main` → webhook auto-fired Jenkins
-  `aisucks` build **#14** = SUCCESS (~65s).
-- **Verified live:** 2× `aisucks-web` pods `Running 1/1` (freshly rolled);
-  `curl http://172.16.238.2:30100/api/health` → `version 2.0.0`; `/`, `/reports`,
-  `/track`, `/icon.svg` all HTTP 200 with expected content (brand, both modules,
-  pipeline KPIs, opportunity rows). 7/7 live content checks passed.
-- **Default-state checkpoint** `f693e9e` (bare scaffold) unchanged for reset-on-request.
-
 ## 2026-07-15 — Reset to default state (Silver & Signal reverted)
 
 - **Action:** operator asked to return the project to its designated default-state
