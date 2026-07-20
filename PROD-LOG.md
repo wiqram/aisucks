@@ -17,8 +17,10 @@ and *how it was verified* (kubectl status, curl of NodePort `172.16.238.2:30100`
   force-push — resulting tree is byte-identical to `f693e9e` (Transit/Prism, Chrome,
   and all `app/lib/*` removed).
 - **Deploy:** push to `main` → GitHub webhook auto-fired Jenkins `aisucks` build
-  **#__** = pending.
-- **Verified live:** _pending._
+  **#16** = SUCCESS (~82s).
+- **Verified live:** `curl http://172.16.238.2:30100/` (HTTP 200) renders **"AI Sucks!"**
+  with no Transit/Prism/Control Tower content; `/api/health` → `version 0.1.0`;
+  `/track`, `/reports`, and `/icon.svg` all → 404. Project is back to the scaffold.
 
 ## 2026-07-15 — Reset to default state (Silver & Signal reverted)
 
