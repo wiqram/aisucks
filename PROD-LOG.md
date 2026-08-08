@@ -4,10 +4,29 @@ Running record of functionality successfully pushed to prod. Append a dated entr
 **after every change is verified live** (pod Running + endpoint responding). Newest first.
 
 Convention per entry: `## YYYY-MM-DD — <what shipped>` then bullets for *what* changed
-and *how it was verified* (kubectl status, curl of NodePort `172.16.238.2:30100` and/or
-`https://aisucks.predictonomy.com`).
+and *how it was verified* (kubectl status + `https://aisucks.qcguy.com`).
+
+> Verification note: the dev box **cannot** reach NodePort `172.16.238.2:30100`
+> (it times out, as do all NodePorts). Verify in-cluster via `kubectl port-forward`
+> and publicly via `https://aisucks.qcguy.com`.
 
 ---
+
+## 2026-08-08 — Public domain repointed to aisucks.qcguy.com
+
+- **Shipped:** `NEXT_PUBLIC_SITE_URL` now `https://aisucks.qcguy.com` in
+  `.env.production` + the `deployment.yaml` env, and as the `metadataBase` fallback in
+  `app/layout.tsx`; README updated. The previous `aisucks.predictonomy.com` never got an
+  NPM proxy host (dummy cert + 404) and is abandoned. `/api/health` fallback version
+  bumped `0.1.0` → `0.1.1` so a deploy can be *proven* landed, not inferred.
+- **Deploy:** confirmed **push-to-main auto-triggers Jenkins** — build **#19** fired
+  ~10s after `git push` with no manual trigger and finished **SUCCESS** in ~55s.
+- **Verified live:** fresh pods (2/2 Running, 24–36s old); in-cluster via port-forward
+  `{"service":"aisucks-web","version":"0.1.1"}`; publicly
+  `https://aisucks.qcguy.com/api/health` → same `0.1.1`, `GET /` → 200 rendering
+  "AI Sucks!". Total push→live ≈ 90s. Public site is Cloudflare-fronted
+  (`server: cloudflare`, Google Trust Services cert, HTML `cf-cache-status: DYNAMIC`
+  so page changes are not cached); HTTP 301s to HTTPS.
 
 ## 2026-07-20 — Reset to default state (Control Tower reverted)
 
