@@ -50,7 +50,7 @@ spec:
               value: "0.0.0.0"
             # Public, non-secret. Runtime (not build-inlined) so it can change without a rebuild.
             - name: NEXT_PUBLIC_SITE_URL
-              value: "https://aisucks.predictonomy.com"
+              value: "https://aisucks.qcguy.com"
           resources:
             requests:
               cpu: "50m"

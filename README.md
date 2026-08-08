@@ -18,7 +18,7 @@ variant** (no Postgres / Vault / migrate yet — added when the idea needs data)
 | NodePort | **`30100`** (verified free vs every `deployment.yaml`/`compiled*.yaml` + Jenkins 30380) |
 | Dev port (local) | `3013` |
 | Prod container port | `3000` |
-| Domain (planned) | `aisucks.predictonomy.com` → NPM → `172.16.238.2:30100` |
+| Domain (planned) | `aisucks.qcguy.com` → NPM → `172.16.238.2:30100` |
 | Health probe | `GET /api/health` |
 
 ## Local dev
@@ -62,9 +62,9 @@ These live OUTSIDE the repo. Only #1 and #2 are needed to serve on the NodePort;
    `trigger-app-builds.sh` (agents assemble the URL via `jenkins-deploy-url.sh`;
    never hardcode the token).
 3. **Public domain (optional, when you want HTTPS)** —
-   - **DNS**: point `aisucks.predictonomy.com` A-record at the host's public IP.
+   - **DNS**: point `aisucks.qcguy.com` A-record at the host's public IP.
    - **NPM proxy host** (admin UI `172.16.238.10:81`, MariaDB-backed — UI/API only):
-     new proxy host `aisucks.predictonomy.com` → forward `172.16.238.2:30100`,
+     new proxy host `aisucks.qcguy.com` → forward `172.16.238.2:30100`,
      scheme `http`, **SSL forced + request a Let's Encrypt cert** (HTTP-01).
 
 No Vault policy/age-key/role is needed for this web-only app (no secrets). Add them
@@ -76,7 +76,7 @@ No Vault policy/age-key/role is needed for this web-only app (no secrets). Add t
 kubectl -n aisucks get po                 # aisucks-web pods Running
 curl -s http://172.16.238.2:30100/api/health   # {"status":"ok",...}
 # once DNS + NPM are set:
-curl -sI https://aisucks.predictonomy.com # 200
+curl -sI https://aisucks.qcguy.com # 200
 ```
 
 ## Growing this into the real product
