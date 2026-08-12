@@ -1,10 +1,30 @@
 @import 'tailwindcss';
 @import 'tw-animate-css';
 
-/* Tailwind v4: theme config lives here, not in a JS config file. Per-idea, override
-   these tokens (and add fonts via next/font CSS variables) instead of sprinkling
-   arbitrary values through the markup. */
+/* Kickstand — "asphalt and spec plate".
+   Tailwind v4 keeps theme config here rather than in a JS file. Tokens only; the
+   markup stays free of raw hex values. */
 @theme {
+  /* Surfaces, darkest to lightest. The whole site is one committed dark palette —
+     a garage at night — so there is no light variant to keep in sync. */
+  --color-ink: #0a0b0c;
+  --color-panel: #101316;
+  --color-raise: #16191d;
+  --color-line: #23272c;
+  --color-line-soft: #1a1e22;
+
+  /* Text, quietest to loudest. */
+  --color-fog: #8d959d;
+  --color-mist: #b8bfc5;
+  --color-chalk: #f2f4f5;
+
+  /* The single accent. One per view — used for price, active state and CTA only. */
+  --color-signal: #ff5a1f;
+
+  --font-display: var(--font-anton), 'Arial Narrow', system-ui, sans-serif;
+  --font-sans: var(--font-archivo), system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --font-mono: var(--font-mono-face), ui-monospace, 'SFMono-Regular', Menlo, monospace;
+
   /* Fixed z-index scale — never use arbitrary z-values. */
   --z-index-base: 0;
   --z-index-raised: 10;
@@ -16,58 +36,224 @@
 
 @layer base {
   html {
-    color-scheme: light dark;
-    /* Anchor links land below any sticky header instead of under it. */
-    scroll-padding-top: 5rem;
+    color-scheme: dark;
+    /* Anchor links land below the sticky header instead of under it. */
+    scroll-padding-top: 5.5rem;
+    scroll-behavior: smooth;
   }
 
   body {
-    background: #0b0b0f;
-    color: #f5f5f7;
-    font-family: system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    background: var(--color-ink);
+    color: var(--color-chalk);
+    font-family: var(--font-sans);
     -webkit-font-smoothing: antialiased;
   }
 
-  /* Headings balance, prose reads pretty — applied once here so individual
-     components don't have to remember text-balance / text-pretty. */
-  h1, h2, h3, h4 {
+  /* Applied once here so components don't have to remember it. */
+  h1,
+  h2,
+  h3,
+  h4 {
     text-wrap: balance;
   }
 
-  p, li {
+  p,
+  li {
     text-wrap: pretty;
   }
 
-  /* Visible focus for keyboard users on every interactive element. */
   :focus-visible {
-    outline: 2px solid currentColor;
+    outline: 2px solid var(--color-signal);
     outline-offset: 2px;
+  }
+
+  /* Anton is a display face: it only earns its keep in caps at large sizes. */
+  .font-display {
+    text-transform: uppercase;
+    letter-spacing: 0.005em;
+  }
+
+  /* Native dialog backdrop — the element gives us focus trapping and Esc for free. */
+  dialog::backdrop {
+    background: color-mix(in srgb, var(--color-ink) 92%, transparent);
+  }
+
+  dialog {
+    /* Tailwind's reset zeroes `margin` on everything, which silently removes the
+       UA's `margin: auto` on a modal dialog and pins the sheet to the top-left
+       corner. Put it back explicitly. */
+    margin: auto;
+    max-height: calc(100dvh - 2rem);
+    /* The sheet's own inner container scrolls, so the dialog never grows a second
+       scrollbar of its own. */
+    overflow: hidden;
+  }
+
+  /* showModal() parks focus on the dialog itself when nothing inside has claimed
+     it, which would otherwise draw the global focus ring around the entire sheet.
+     The dialog is a container, not a control — Esc still closes it, and the first
+     Tab lands on the close button with a visible ring. */
+  dialog:focus-visible {
+    outline: none;
   }
 
   /* Honour the OS reduced-motion setting globally, including tw-animate-css. */
   @media (prefers-reduced-motion: reduce) {
-    *, *::before, *::after {
+    html {
+      scroll-behavior: auto;
+    }
+
+    *,
+    *::before,
+    *::after {
       animation-duration: 0.01ms !important;
       animation-iteration-count: 1 !important;
       transition-duration: 0.01ms !important;
-      scroll-behavior: auto !important;
     }
   }
 }
 
-/* --- scaffold placeholder styles; replaced when the business idea lands --- */
-.hero {
-  min-height: 100dvh;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 2rem;
-  text-align: center;
-}
+@layer components {
+  /* Page gutter. One container rule, so every section lines up. */
+  .shell {
+    width: 100%;
+    max-width: 78rem;
+    margin-inline: auto;
+    padding-inline: 1.25rem;
+  }
 
-.hero__title {
-  font-size: clamp(3rem, 18vw, 12rem);
-  font-weight: 800;
-  letter-spacing: -0.03em;
-  line-height: 1;
+  @media (min-width: 48rem) {
+    .shell {
+      padding-inline: 2rem;
+    }
+  }
+
+  /* The recurring micro-label: mono, uppercase, wide. Tracking is deliberate —
+     small caps text is unreadable at default spacing. */
+  .label {
+    font-family: var(--font-mono);
+    font-size: 0.6875rem;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.16em;
+    color: var(--color-fog);
+  }
+
+  /* Card surface: flat fill, hairline edge, no shadow. */
+  .plate {
+    background: var(--color-panel);
+    border: 1px solid var(--color-line);
+    border-radius: 0.25rem;
+  }
+
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    border: 1px solid transparent;
+    border-radius: 0.1875rem;
+    padding: 0.75rem 1.25rem;
+    font-size: 0.875rem;
+    font-weight: 600;
+    line-height: 1;
+    cursor: pointer;
+    /* 150ms — interaction feedback stays under the 200ms ceiling. */
+    transition: background-color 150ms ease-out, border-color 150ms ease-out, color 150ms ease-out;
+  }
+
+  .btn:disabled {
+    cursor: not-allowed;
+    opacity: 0.45;
+  }
+
+  .btn-primary {
+    background: var(--color-signal);
+    color: #0a0b0c;
+  }
+
+  .btn-primary:hover:not(:disabled) {
+    background: color-mix(in srgb, var(--color-signal) 86%, #fff);
+  }
+
+  .btn-ghost {
+    border-color: var(--color-line);
+    background: transparent;
+    color: var(--color-chalk);
+  }
+
+  .btn-ghost:hover:not(:disabled) {
+    border-color: var(--color-fog);
+  }
+
+  /* Form controls. Native elements throughout — the browser's keyboard behaviour
+     is better than anything hand-rolled. */
+  .field {
+    width: 100%;
+    background: var(--color-raise);
+    border: 1px solid var(--color-line);
+    border-radius: 0.1875rem;
+    padding: 0.625rem 0.75rem;
+    font-size: 0.9375rem;
+    font-family: var(--font-sans);
+    color: var(--color-chalk);
+    transition: border-color 150ms ease-out;
+  }
+
+  .field:hover {
+    border-color: var(--color-fog);
+  }
+
+  select.field {
+    appearance: none;
+    padding-right: 2rem;
+  }
+
+  /* Dark UA calendar/spinner glyphs are near-invisible on this palette. */
+  input[type='date'].field::-webkit-calendar-picker-indicator {
+    filter: invert(1);
+    opacity: 0.55;
+    cursor: pointer;
+  }
+
+  /* Range input, styled in both engines. */
+  .slider {
+    width: 100%;
+    appearance: none;
+    background: transparent;
+    cursor: pointer;
+  }
+
+  .slider::-webkit-slider-runnable-track {
+    height: 2px;
+    background: var(--color-line);
+  }
+
+  .slider::-moz-range-track {
+    height: 2px;
+    background: var(--color-line);
+  }
+
+  .slider::-webkit-slider-thumb {
+    appearance: none;
+    width: 1rem;
+    height: 1rem;
+    margin-top: -0.4375rem;
+    border-radius: 50%;
+    background: var(--color-signal);
+  }
+
+  .slider::-moz-range-thumb {
+    width: 1rem;
+    height: 1rem;
+    border: 0;
+    border-radius: 50%;
+    background: var(--color-signal);
+  }
+
+  /* Tabular figures everywhere numbers are compared down a column. */
+  .num {
+    font-family: var(--font-mono);
+    font-variant-numeric: tabular-nums;
+  }
 }

@@ -1,12 +1,44 @@
-# aisucks
+# aisucks — Kickstand
 
-Bare-bones Next.js app deployed on the private Minikube cloud. Right now it just
-renders **"AI Sucks!"** in large font — the entire deploy architecture (Docker →
-`container-registry.traderyolo.com` → Jenkins → Minikube NodePort) is wired around
-it. When the business idea is decided, it gets built on top of `app/page.tsx`.
+Next.js app deployed on the private Minikube cloud, live at
+**https://aisucks.qcguy.com**.
+
+The product is **Kickstand**: peer-to-peer motorcycle rental. Owners release the days
+they aren't riding, riders book by city/date/licence, and the platform carries the
+insurance, the DVLA licence check and the rental agreement. "Autopilot" prices a
+listing against local demand, season and weekend density, and screens riders, so a
+bike earns while its owner is away.
 
 Scaffolded from `~/IdeaProjects/step0/base-architecture-scaffold.md`, **web-only
-variant** (no Postgres / Vault / migrate yet — added when the idea needs data).
+variant**: there is deliberately **no database**. The fleet is a data module
+(`lib/bikes.ts`) and the API routes are stubs that apply the real rules without
+persisting anything. Add Postgres/Vault only if the product needs to store data.
+
+## How it is put together
+
+| Layer | Where | Notes |
+|---|---|---|
+| Domain types | `lib/types.ts` | Framework-free |
+| Pricing, availability, earnings, Autopilot | `lib/pricing.ts` | Pure functions, no clock reads — `today` is always a parameter |
+| Fleet data | `lib/bikes.ts` | Listing windows stored as day offsets and resolved against a supplied `today`, so the fleet never goes stale |
+| Page sections | `components/*.tsx` | Server components except `Fleet`, `BookingSheet`, `HostCalculator` |
+| Stub API | `app/api/{bikes,quote,bookings}` | Validates input, re-prices server-side, persists nothing |
+
+Two rules the code holds to, both learned the hard way:
+
+- **Nothing visible is gated behind JavaScript.** The whole fleet is in the
+  server-rendered HTML; filters only narrow what is already there. `scripts/smoke.mjs`
+  asserts the served HTML contains zero `opacity:0`.
+- **The clock is read in exactly one place** (`lib/today.ts`). Everything else takes
+  `today` as an argument, which keeps server render and client hydration in agreement
+  and makes the pricing rules testable.
+
+## Fonts
+
+Self-hosted from `public/fonts` via `next/font/local` (Anton, Archivo, JetBrains
+Mono — latin subsets, ~85 KB total). Deliberately **not** `next/font/google`: the
+production image then builds with no outbound network beyond npm, and there is no
+third-party request on first paint.
 
 ## Fixed facts for this app
 
@@ -18,7 +50,7 @@ variant** (no Postgres / Vault / migrate yet — added when the idea needs data)
 | NodePort | **`30100`** (verified free vs every `deployment.yaml`/`compiled*.yaml` + Jenkins 30380) |
 | Dev port (local) | `3013` |
 | Prod container port | `3000` |
-| Domain (planned) | `aisucks.qcguy.com` → NPM → `172.16.238.2:30100` |
+| Domain (live) | `aisucks.qcguy.com` → Cloudflare → NPM → `172.16.238.2:30100` |
 | Health probe | `GET /api/health` |
 
 ## Local dev
@@ -29,6 +61,25 @@ npm run dev          # http://localhost:3013
 # or, containerised:
 docker compose up --build web
 ```
+
+## Tests
+
+No test framework dependency — Node's built-in runner strips the TypeScript.
+
+```bash
+npm test         # unit tests: pricing, availability, earnings, Autopilot, fleet integrity
+npm run typecheck
+npm run lint
+npm run build
+
+# integration: boot the build, then assert against any base URL
+npm start &
+node scripts/smoke.mjs http://127.0.0.1:3013
+node scripts/smoke.mjs https://aisucks.qcguy.com   # same assertions against prod
+```
+
+`scripts/smoke.mjs` imports `lib/` directly, so it checks the deployed API's prices
+against the pricing module rather than against hardcoded numbers.
 
 ## Deploy to prod
 
