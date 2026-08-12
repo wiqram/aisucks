@@ -12,6 +12,57 @@ and *how it was verified* (kubectl status + `https://aisucks.qcguy.com`).
 
 ---
 
+## 2026-08-12 — Kickstand shipped: peer-to-peer motorcycle rental
+
+- **Shipped:** the business idea, built on the scaffold. **Kickstand** — rent a
+  motorcycle from its owner, or earn from yours while it sits idle. 15 privately-owned
+  listings across 8 UK cities, filterable by city/category/A2 licence/price/instant-book
+  and by date; a booking sheet that quotes itemised prices (daily rate, weekly and
+  monthly rates, insurance tier, extras, 9% service fee, deposit pre-auth); three
+  insurance tiers compared in full; a legal section covering DVLA licence checks, the
+  per-trip agreement, territory and mileage limits and the disputes process; "Autopilot"
+  automated pricing that shows its reasoning and is capped at ±30% of the host's own
+  rate; and a host earnings calculator built on observed 62% occupancy.
+- **No database, by design.** The fleet is a data module and
+  `/api/{bikes,quote,bookings}` are stubs that validate input and re-price server-side
+  without persisting anything. Booking a clashing date returns 409, not 400.
+- **Two decisions worth keeping:** listing windows are stored as *day offsets* and
+  resolved against a supplied `today`, so the fleet can never drift into showing a
+  calendar that only worked the month it was deployed; and the clock is read in exactly
+  one place (`lib/today.ts`), which is what keeps SSR and hydration in agreement.
+- **Fonts self-hosted** (~85 KB, `next/font/local`) rather than `next/font/google`, so
+  the production image builds with no outbound network beyond npm — one fewer way for a
+  build to fail mid-demo.
+- **Bugs found and fixed before shipping**, all by testing rather than by reading:
+  Autopilot was suggesting **+58%** over the standing rate because city, season and
+  weekend multipliers compounded on a rate that already priced in city and season
+  (now damped deviations from a baseline, hard-capped at 30%); the booking dialog
+  rendered pinned to the top-left because Tailwind's reset zeroes `margin` and silently
+  removes the UA's `margin: auto` on a modal `<dialog>`; and the insurance table's
+  `sr-only` cells are `position: absolute`, so with no positioned ancestor they resolved
+  against the document, escaped their `overflow-x-auto` wrapper and gave the whole page
+  a horizontal scrollbar on mobile.
+- **Also fixed:** the scaffold shipped a `lint` script with **no ESLint config**, so
+  `npm run lint` had never linted anything. Added `eslint.config.mjs`; it immediately
+  caught an `<a href="/">` that should have been `next/link`.
+- **Tests:** 63 unit tests via `node --test` (no test-framework dependency — Node strips
+  the types). They assert that quote lines always reconcile to the printed subtotal,
+  discount thresholds at exactly 7 and 28 days, BST-safe date maths, availability
+  overlap at both boundaries, earnings monotonicity, and that Autopilot stays inside its
+  cap across 5,760 city/category/date/length combinations. Plus `scripts/smoke.mjs` —
+  67 integration checks that run against **any** base URL, so the identical assertions
+  gate the local build and verify prod. It imports `lib/` directly, so it checks the
+  deployed API's prices against the pricing module rather than hardcoded numbers.
+- **Deploy:** push to `main` auto-fired Jenkins **#23** = **SUCCESS** (~75s).
+- **Verified live:** fresh pods (2/2 Running, 20–33s old), rollout complete, running
+  image `aisucks-web:latest`; in-cluster health via port-forward `version 1.0.0`
+  (bumped from `0.1.1` as deploy proof); public `https://aisucks.qcguy.com` → 200 with
+  the fleet in the HTML. **All 67 smoke checks passed against the public URL**,
+  including `opacity:0` count = 0, every one of the 15 listings and its price present in
+  the server-rendered HTML, quote totals matching the pricing module, and 409s on
+  clashing dates. Booking flow driven end to end in a real browser at 1440px and 390px:
+  quote → confirm → reference `KS-xxxx`, no console errors or hydration warnings.
+
 ## 2026-08-08 — Public domain repointed to aisucks.qcguy.com
 
 - **Shipped:** `NEXT_PUBLIC_SITE_URL` now `https://aisucks.qcguy.com` in
