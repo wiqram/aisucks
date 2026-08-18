@@ -58,14 +58,24 @@ spec:
             limits:
               cpu: "500m"
               memory: "384Mi"
+          # Measured 2026-08-18: this container logs "✓ Ready in 0ms" 0.9s after start,
+          # but initialDelaySeconds: 8 / periodSeconds: 10 meant the kubelet did not look
+          # until 8s, so the pod went Ready at ~11.5s. With replicas: 2 and
+          # maxUnavailable: 0 the pods replace strictly one at a time, so a rollout that
+          # should take ~7s took a measured 24.8s — ~22s of it waiting on a probe for an
+          # app that was already serving. The image pull was 150ms of that 24.8s.
+          # failureThreshold rises in step with the shorter period so the tolerated
+          # startup budget is UNCHANGED: was 8 + 10x6 = 68s, now 0 + 2x34 = 68s.
+          # livenessProbe below is deliberately NOT touched — a readiness failure only
+          # withholds traffic, a liveness failure KILLS the container.
           readinessProbe:
             httpGet:
               path: /api/health
               port: 3000
-            initialDelaySeconds: 8
-            periodSeconds: 10
-            timeoutSeconds: 5
-            failureThreshold: 6
+            initialDelaySeconds: 0
+            periodSeconds: 2
+            timeoutSeconds: 2
+            failureThreshold: 34
           livenessProbe:
             httpGet:
               path: /api/health
